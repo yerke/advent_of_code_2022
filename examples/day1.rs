@@ -2,22 +2,19 @@ use std::fs::read_to_string;
 
 fn main() -> anyhow::Result<()> {
     let input = read_to_string("./data/day1.txt")?;
-    let mut current_elf_sum = 0;
-    let mut max_elf_sum = 0;
-    for line in input.lines() {
-        if line == "" {
-            if current_elf_sum > max_elf_sum {
-                max_elf_sum = current_elf_sum
-            }
-            current_elf_sum = 0;
-            continue;
-        }
 
-        let calories = line.parse::<i32>()?;
-        current_elf_sum += calories;
-    }
+    let mut sums: Vec<i32> = input
+        .split("\n\n")
+        .map(|lines| lines
+            .split_whitespace()
+            .fold(0, |acc, x| acc + x.parse::<i32>().unwrap())
+            )
+        .collect();
+    sums.sort();
 
-    println!("max: {max_elf_sum}");
+    let len = sums.len();
+    println!("max: {}", sums[len-1]);
+    println!("max 3 sum: {}", sums[len-1] + sums[len-2] + sums[len-3]);
 
     Ok(())
 }

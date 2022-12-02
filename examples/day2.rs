@@ -1,16 +1,24 @@
 use std::fs::read_to_string;
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Copy, Clone)]
 enum Move {
     Rock,
     Paper,
     Scissors,
 }
 
+#[derive(Eq, PartialEq, Debug)]
+enum GameResult {
+    Win,
+    Lose,
+    Draw
+}
+
 fn main() -> anyhow::Result<()> {
     let input = read_to_string("./data/day2.txt")?;
 
-    let mut total_score = 0;
+    let mut total_score_part1 = 0;
+    let mut total_score_part2 = 0;
 
     input
         .split("\n")
@@ -18,19 +26,20 @@ fn main() -> anyhow::Result<()> {
             let parts: Vec<&str> = l.split(" ").collect();
             let opponent_move = translate_opponent_move(parts[0]);
             let my_move = translate_my_move(parts[1]);
-            let mut score = match my_move {
-                Move::Rock => 1,
-                Move::Paper => 2,
-                Move::Scissors => 3,
-            };
-            dbg!(score);
-            score += compare_moves(opponent_move, my_move);
-            dbg!(score);
-            total_score += score;
-            dbg!(total_score);
+            let mut score_part1 = my_move_score(&my_move);
+            score_part1 += compare_moves(opponent_move, my_move);
+            total_score_part1 += score_part1;
+
+            // part 2
+            let expected_result = translate_expected_result(parts[1]);
+            let my_expected_move = get_move(&opponent_move, expected_result);
+            let mut score_part2 = my_move_score(&my_expected_move);
+            score_part2 += compare_moves(opponent_move, my_expected_move);
+            total_score_part2 += score_part2;
         });
 
-    println!("{total_score}");
+    println!("{total_score_part1}");
+    println!("{total_score_part2}");
 
     Ok(())
 }
@@ -50,6 +59,39 @@ fn translate_my_move(s: &str) -> Move {
         "Y" => Move::Paper,
         "Z" => Move::Scissors,
         _ => panic!("Unexpected my move: {s}")
+    }
+}
+
+fn translate_expected_result(s: &str) -> GameResult {
+    match s {
+        "X" => GameResult::Lose,
+        "Y" => GameResult::Draw,
+        "Z" => GameResult::Win,
+        _ => panic!("Unexpected expected result: {s}")
+    }
+}
+
+fn get_move(opponent: &Move, expected_result: GameResult) -> Move {
+    if expected_result == GameResult::Draw {
+        return opponent.clone();
+    }
+
+    match (opponent, expected_result) {
+        (Move::Rock, GameResult::Win) => Move::Paper,
+        (Move::Rock, GameResult::Lose) => Move::Scissors,
+        (Move::Paper, GameResult::Win) => Move::Scissors,
+        (Move::Paper, GameResult::Lose) => Move::Rock,
+        (Move::Scissors, GameResult::Win) => Move::Rock,
+        (Move::Scissors, GameResult::Lose) => Move::Paper,
+        _ => panic!("expected draw should have been handled earlier")
+    }
+}
+
+fn my_move_score(my_move: &Move) -> i32 {
+    match my_move {
+        Move::Rock => 1,
+        Move::Paper => 2,
+        Move::Scissors => 3,
     }
 }
 

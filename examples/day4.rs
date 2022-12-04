@@ -4,6 +4,7 @@ fn main() -> anyhow::Result<()> {
     let input = read_to_string("./data/day4.txt")?;
 
     let mut part1_total = 0;
+    let mut part2_total = 0;
     input
         .split("\n")
         .for_each(|l| {
@@ -11,16 +12,21 @@ fn main() -> anyhow::Result<()> {
             let left = parts[0];
             let right = parts[1];
             let left_idxs = get_range(left);
-            // dbg!(left_idxs);
             let right_idxs = get_range(right);
-            // dbg!(right_idxs);
+
             if (left_idxs.0 <= right_idxs.0 && left_idxs.1 >= right_idxs.1)
                 || (right_idxs.0 <= left_idxs.0 && right_idxs.1 >= left_idxs.1) {
                 part1_total += 1;
             }
+
+            if (left_idxs.0 <= right_idxs.1 && left_idxs.1 >= right_idxs.1)
+                || (right_idxs.0 <= left_idxs.1 && right_idxs.1 >= left_idxs.1)  {
+                part2_total += 1;
+            }
         });
 
     println!("{part1_total}");
+    println!("{part2_total}");
 
     Ok(())
 }
@@ -33,4 +39,3 @@ fn get_range(s: &str) -> (u32, u32) {
 
     (parts[0], parts[1])
 }
-

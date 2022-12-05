@@ -6,7 +6,7 @@ fn main() -> anyhow::Result<()> {
     let mut part1_total = 0;
     let mut part2_total = 0;
     input
-        .split("\n")
+        .lines()
         .for_each(|l| {
             let parts: Vec<&str> = l.split(",").collect();
             let left = parts[0];

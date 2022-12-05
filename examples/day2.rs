@@ -21,7 +21,7 @@ fn main() -> anyhow::Result<()> {
     let mut total_score_part2 = 0;
 
     input
-        .split("\n")
+        .lines()
         .for_each(|l| {
             let parts: Vec<&str> = l.split(" ").collect();
             let opponent_move = translate_opponent_move(parts[0]);

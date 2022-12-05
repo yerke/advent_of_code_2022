@@ -9,7 +9,7 @@ fn main() -> anyhow::Result<()> {
     // part 1
     let mut part1_total = 0;
     input
-        .split("\n")
+        .lines()
         .for_each(|l| {
             let (left, right) = l.split_at(l.len() / 2);
             let left_set: HashSet<char> = left.chars().collect();

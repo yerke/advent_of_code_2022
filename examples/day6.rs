@@ -12,5 +12,13 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
+    for (i, window) in input.as_bytes().windows(14).enumerate() {
+        let set: HashSet<&u8> = HashSet::from_iter(window);
+        if set.len() == 14 {
+            println!("part 2: {}", i + 14);
+            break;
+        }
+    }
+
     Ok(())
 }

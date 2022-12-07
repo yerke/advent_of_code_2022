@@ -57,8 +57,6 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    // dbg!(&all_dirs);
-
     let mut dir_sizes = vec![0; all_dirs.len()];
     for i in (0..all_dirs.len()).rev() {
         let dir = &all_dirs[i];
@@ -69,11 +67,15 @@ fn main() -> anyhow::Result<()> {
         dir_sizes[i] = filesize_sum + child_dir_filesize_sum;
     }
 
-    // dbg!(&dir_sizes);
-
     let part1: usize = dir_sizes.iter().filter(|&&x| x <= 100_000).sum();
-    println!("{part1}");
+    println!("part 1: {part1}");
 
+    dir_sizes.sort();
+    let unused_space = 70_000_000 - dir_sizes.last().unwrap();
+    let min_space_to_free = 30_000_000 - unused_space;
+
+    let dir_size_to_free = dir_sizes.iter().find(|&&x| x >= min_space_to_free).unwrap();
+    println!("part 2: {dir_size_to_free}");
 
     Ok(())
 }

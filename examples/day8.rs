@@ -45,7 +45,39 @@ fn main() -> anyhow::Result<()> {
 
     part_1 += 2 * width + 2 * height - 4; // outer trees
 
-    println!("{part_1}");
+    // part 2
+    let mut max_product = 0;
+    for y in 1..height-1 {
+        for x in 1..width-1 {
+            let mut product = 1;
+            let h = neighbor_height(x, y);
+            for (d_x, d_y) in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
+                let mut x1 = x;
+                let mut y1 = y;
+                let mut viewing_distance = 0;
+                loop {
+                    x1 += d_x;
+                    y1 += d_y;
+                    let h1 = neighbor_height(x1, y1);
+                    if h1 == -1 {
+                        break;
+                    }
+                    viewing_distance += 1;
+                    if h1 >= h {
+                        break;
+                    }
+                }
+                product *= viewing_distance;
+            }
+
+            if max_product < product {
+                max_product = product;
+            }
+        }
+    }
+
+    println!("part 1: {part_1}");
+    println!("part 2: {max_product}");
 
     Ok(())
 }

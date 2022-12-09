@@ -4,41 +4,41 @@ use std::fs::read_to_string;
 fn main() -> anyhow::Result<()> {
     let input = read_to_string("./data/day9.txt")?;
 
-    let mut head_x: i32 = 0;
-    let mut head_y: i32 = 0;
-    let mut tail_x: i32 = 0;
-    let mut tail_y: i32 = 0;
-    let mut tail_past_positions: HashSet<(i32, i32)> = HashSet::new();
-    tail_past_positions.insert((tail_x, tail_y));
+    let mut rope: Vec<(i32, i32)> = vec![(0, 0); 10];
+    let mut tail1_past_positions: HashSet<(i32, i32)> = HashSet::new();
+    tail1_past_positions.insert((rope[1].0, rope[1].1));
+    let mut tail9_past_positions: HashSet<(i32, i32)> = HashSet::new();
+    tail9_past_positions.insert((rope[9].0, rope[9].1));
 
     for l in input.lines() {
         let parts: Vec<&str> = l.split(' ').collect();
         let direction = parts[0];
         let number_of_steps: usize = parts[1].parse()?;
 
-        for i in 0..number_of_steps {
+        for _ in 0..number_of_steps {
             match direction {
-                "U" => head_y += 1,
-                "D" => head_y -= 1,
-                "L" => head_x -= 1,
-                "R" => head_x += 1,
+                "U" => rope[0].1 += 1,
+                "D" => rope[0].1 -= 1,
+                "L" => rope[0].0 -= 1,
+                "R" => rope[0].0 += 1,
                 _ => panic!(),
             }
 
-            println!("head: {head_x}, {head_y}");
-
-            if too_far(head_x, head_y, tail_x, tail_y) {
-                let new_tail = bring_closer(head_x, head_y, tail_x, tail_y);
-                tail_x = new_tail.0;
-                tail_y = new_tail.1;
-                // println!("moved tail to: {tail_x}, {tail_y}");
+            for t in 0..9 {
+                if too_far(rope[t].0, rope[t].1, rope[t+1].0, rope[t+1].1) {
+                    let new_tail = bring_closer(rope[t].0, rope[t].1, rope[t+1].0, rope[t+1].1);
+                    rope[t+1].0 = new_tail.0;
+                    rope[t+1].1 = new_tail.1;
+                }
             }
 
-            tail_past_positions.insert((tail_x, tail_y));
+            tail1_past_positions.insert((rope[1].0, rope[1].1));
+            tail9_past_positions.insert((rope[9].0, rope[9].1));
         }
     }
 
-    // println!("part 1: {}", tail_past_positions.len());
+    println!("part 1: {}", tail1_past_positions.len());
+    println!("part 2: {}", tail9_past_positions.len());
 
     Ok(())
 }

@@ -28,13 +28,17 @@ fn main() -> anyhow::Result<()> {
     heightmap[end_idx] = b'z' - b'a';
 
     // part 1
-    let part1 = depth_first_search(&heightmap, width, height, start_idx, end_idx)?;
+    let part1 = depth_first_search_part1(&heightmap, width, height, start_idx, end_idx)?;
     println!("part 1: {part1}");
+
+    // part 2
+    let part2 = depth_first_search_part2(&heightmap, width, height, end_idx)?;
+    println!("part 2: {part2}");
 
     Ok(())
 }
 
-fn depth_first_search(heightmap: &Vec<u8>, width: usize, height: usize, start_idx: usize, end_idx: usize) -> anyhow::Result<usize> {
+fn depth_first_search_part1(heightmap: &Vec<u8>, width: usize, height: usize, start_idx: usize, end_idx: usize) -> anyhow::Result<usize> {
     let mut queue: VecDeque<(usize, usize, usize)> = VecDeque::new();
     let mut visited: Vec<bool> = vec![false; width * height];
     queue.push_back((0, start_idx % width, start_idx / width));
@@ -60,6 +64,40 @@ fn depth_first_search(heightmap: &Vec<u8>, width: usize, height: usize, start_id
             }
 
             if heightmap[candidate_idx] <= heightmap[current_idx] + 1 {
+                visited[candidate_idx] = true;
+                queue.push_back((cur_len + 1, x1 as usize, y1 as usize));
+            }
+        }
+    }
+    panic!("Failed to find end");
+}
+
+fn depth_first_search_part2(heightmap: &Vec<u8>, width: usize, height: usize, start_idx: usize) -> anyhow::Result<usize> {
+    let mut queue: VecDeque<(usize, usize, usize)> = VecDeque::new();
+    let mut visited: Vec<bool> = vec![false; width * height];
+    queue.push_back((0, start_idx % width, start_idx / width));
+    visited[start_idx] = true;
+    while queue.len() > 0 {
+        let (cur_len, x, y) = queue.pop_front().unwrap();
+        let current_idx = y * width + x;
+        if heightmap[current_idx] == 0 {
+            return Ok(cur_len);
+        }
+
+        for delta in DELTAS {
+            let x1 = x as i32 + delta.0;
+            let y1 = y as i32 + delta.1;
+            if !are_valid_coordinates(x1, y1, width, height) {
+                continue;
+            }
+
+            let candidate_idx = y1 as usize * width + x1 as usize;
+
+            if visited[candidate_idx] {
+                continue;
+            }
+
+            if heightmap[current_idx] <= heightmap[candidate_idx] + 1 {
                 visited[candidate_idx] = true;
                 queue.push_back((cur_len + 1, x1 as usize, y1 as usize));
             }

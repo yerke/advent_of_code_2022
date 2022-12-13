@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fs::read_to_string;
 
 #[derive(Debug, Clone)]
@@ -18,12 +19,34 @@ impl List {
         }
     }
 
-    fn new_with_one_element(e: u8) -> List {
+    fn new_with_one_element(e: Element) -> List {
         let mut elements: Vec<Box<Element>> = Vec::new();
-        elements.push(Box::new(Element::Int(e)));
+        elements.push(Box::new(e));
 
         List {
             elements
+        }
+    }
+}
+
+impl PartialEq<Self> for List {
+    fn eq(&self, other: &Self) -> bool {
+        let decision = is_in_right_order(&self, other);
+        match decision {
+            Decision::Correct => false,
+            Decision::Incorrect => false,
+            Decision::Inconclusive => true,
+        }
+    }
+}
+
+impl PartialOrd for List {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        let decision = is_in_right_order(&self, other);
+        match decision {
+            Decision::Correct => Some(Ordering::Less),
+            Decision::Incorrect => Some(Ordering::Greater),
+            Decision::Inconclusive => panic!(),
         }
     }
 }
@@ -103,16 +126,6 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    // for (left, right) in &pairs {
-    //     println!("left: ");
-    //     pretty_print(left);
-    //     println!();
-    //
-    //     println!("right: ");
-    //     pretty_print(right);
-    //     println!();
-    // }
-
     // part 1
     let mut part1 = 0;
     for (i, (left, right)) in pairs.iter().enumerate() {
@@ -126,6 +139,24 @@ fn main() -> anyhow::Result<()> {
     }
 
     println!("part 1: {part1}");
+
+    // part 2
+    let mut packets: Vec<List> = Vec::new();
+    for (left, right) in pairs {
+        packets.push(left);
+        packets.push(right);
+    }
+
+    let divider_2 = List::new_with_one_element(Element::List(List::new_with_one_element(Element::Int(2))));
+    let divider_6 = List::new_with_one_element(Element::List(List::new_with_one_element(Element::Int(6))));
+    packets.push(divider_2.clone());
+    packets.push(divider_6.clone());
+
+    packets.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+    let divider_2_idx = packets.iter().position(|l| l == &divider_2).unwrap() + 1;
+    let divider_6_idx = packets.iter().position(|l| l == &divider_6).unwrap() + 1;
+    println!("part 2: {}", divider_2_idx * divider_6_idx);
 
     Ok(())
 }
@@ -178,7 +209,7 @@ fn is_in_right_order(left: &List, right: &List) -> Decision {
                         // if inconclusive, do nothing
                     },
                     (Element::List(left_l), Element::Int(right_i)) => {
-                        let right_l = List::new_with_one_element(right_i);
+                        let right_l = List::new_with_one_element(Element::Int(right_i));
                         let decision = is_in_right_order(&left_l, &right_l);
                         if decision == Decision::Correct || decision == Decision::Incorrect {
                             return decision
@@ -186,7 +217,7 @@ fn is_in_right_order(left: &List, right: &List) -> Decision {
                         // if inconclusive, do nothing
                     },
                     (Element::Int(left_i), Element::List(right_l)) => {
-                        let left_l = List::new_with_one_element(left_i);
+                        let left_l = List::new_with_one_element(Element::Int(left_i));
                         let decision = is_in_right_order(&left_l, &right_l);
                         if decision == Decision::Correct || decision == Decision::Incorrect {
                             return decision

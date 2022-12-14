@@ -1,7 +1,6 @@
-extern crate core;
-
 use std::fs::read_to_string;
 
+#[derive(Clone)]
 struct Maze {
     maze: Vec<u8>,
     min_x: usize,
@@ -40,7 +39,7 @@ impl Maze {
     fn add_sand(&mut self) -> bool {
         let sand_source_idx = self.translate_coordinates(self.sand_source_x, self.sand_source_y);
         if self.maze[sand_source_idx] != 0 {
-            panic!("Unexpectedly sand source is occupied");
+            return false;
         }
 
         let (mut x, mut y) = (self.sand_source_x, self.sand_source_y);
@@ -116,6 +115,12 @@ fn main() -> anyhow::Result<()> {
     min_y = min_y.min(sand_source_y);
     max_y = max_y.max(sand_source_y);
 
+    // adjustments for part 2
+    max_y += 2;
+    let distance_from_sand_source_to_floor = max_y - sand_source_y;
+    min_x = min_x.min(sand_source_x - distance_from_sand_source_to_floor);
+    max_x = max_x.max(sand_source_x + distance_from_sand_source_to_floor);
+
     let mut maze = Maze::new(min_x, max_x, min_y, max_y, sand_source_x, sand_source_y);
     for path in &paths {
         for couple in path.windows(2) {
@@ -138,14 +143,32 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    let mut steps = 0;
+    let maze_part2 = maze.clone();
+    // part 1
+    let mut steps_part1 = 0;
     while maze.add_sand() {
-        steps += 1;
+        steps_part1 += 1;
         // println!("After step {steps}");
         // maze.print_maze();
     }
 
-    println!("part 1: {steps}");
+    println!("part 1: {steps_part1}");
+
+    // part 2
+    // add floor
+    let mut maze = maze_part2;
+    for x in min_x..=max_x {
+        maze.fill(x, max_y, 1);
+    }
+
+    let mut steps_part2 = 0;
+    while maze.add_sand() {
+        steps_part2 += 1;
+        // println!("After step {steps_part2}");
+        // maze.print_maze();
+    }
+
+    println!("part 2: {steps_part2}");
 
     Ok(())
 }
